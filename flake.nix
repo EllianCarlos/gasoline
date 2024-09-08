@@ -1,5 +1,5 @@
 {
-  description = "Minimal example of building Kotlin with Gradle and Nix";
+  description = "Gasoline";
 
   inputs = { nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable"; };
 

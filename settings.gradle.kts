@@ -1,4 +1,4 @@
-rootProject.name = "minimal-kotlin-nix-example"
+rootProject.name = "gasoline"
 
 pluginManagement {
     repositories {

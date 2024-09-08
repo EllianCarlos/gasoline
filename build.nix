@@ -19,7 +19,7 @@ let
   };
 in
 stdenv.mkDerivation {
-  pname = "minimal-kotlin-nix-example";
+  pname = "gasoline";
   version = "0.1.0";
 
   src = ./.;
