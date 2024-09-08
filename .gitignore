@@ -17,3 +17,7 @@ out/
 
 /result
 kls_database.db
+
+## builded files by nix
+result/
+result.jar
