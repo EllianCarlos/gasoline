@@ -4,6 +4,7 @@ import core.TestRunner
 
 fun main() {
     TestRunner
+        .preSuitRunner(MyTests())
         .runTests(MyTests())
         .let(TestReporter::generateReport)
         .also(::println)
