@@ -8,7 +8,7 @@ object TestRunner {
         testClass::class.java
             .declaredMethods
             .asSequence()
-            .filter { it.isAnnotationPresent(Test::class.java) }
+            .filter { it.isAnnotationPresent(Test::class.java) and it.isAnnotationPresent(Disabled::class.java).not() }
             .map { method -> executeTest(method, testClass) }
             .toList()
             .toSummary(testClass::class.simpleName ?: "Unknown")

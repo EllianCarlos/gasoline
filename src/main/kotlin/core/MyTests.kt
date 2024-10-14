@@ -14,6 +14,7 @@ class MyTests {
         assert(result == 2) { "Expected 2 but got $result" }
     }
 
+    @Disabled
     @Test
     fun testFailingTest() {
         val result = 2 * 2
