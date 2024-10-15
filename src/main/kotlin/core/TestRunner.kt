@@ -9,29 +9,28 @@ import java.lang.reflect.Method
 object TestRunner {
     private fun preSuite(testClass: Any) =
         this.also {
-            findFirstMethodAnnotated<BeforeAll>(testClass)
-                ?.let { executeMethod(it, testClass) }
+            findFirstMethodAnnotatedAndExecute<BeforeAll>(testClass)
         }
 
     private fun postSuite(testClass: Any) =
         this.also {
-            findFirstMethodAnnotated<AfterAll>(testClass)
-                ?.let { executeMethod(it, testClass) }
+            findFirstMethodAnnotatedAndExecute<AfterAll>(testClass)
         }
 
     private fun preTest(testClass: Any) =
         this.also {
-            findFirstMethodAnnotated<BeforeEach>(testClass)
-                ?.let { executeMethod(it, testClass) }
+            findFirstMethodAnnotatedAndExecute<BeforeEach>(testClass)
         }
 
     private fun postTest(testClass: Any) =
         this.also {
-            findFirstMethodAnnotated<AfterEach>(testClass)
-                ?.let { executeMethod(it, testClass) }
+            findFirstMethodAnnotatedAndExecute<AfterEach>(testClass)
         }
 
     fun runTests(testClass: Any): TestSummary {
+        val methods = testClass::class.java.declaredMethods
+        val testMethods = methods.filter { it.isTest() && !it.isAnnotationPresent(Disabled::class.java) }
+
         preSuite(testClass)
         val toReturn =
             testClass::class.java
@@ -79,6 +78,11 @@ object TestRunner {
         testClass::class.java
             .declaredMethods
             .firstOrNull { it.annotations.firstOrNull { annotation -> annotation is predicatedAnnotation } != null }
+
+    private inline fun <
+        reified predicatedAnnotation : Any,
+    > findFirstMethodAnnotatedAndExecute(testClass: Any) =
+        findFirstMethodAnnotated<predicatedAnnotation>(testClass)?.let { executeMethod(it, testClass) }
 }
 
 private fun Method.isTest(): Boolean = this.isAnnotationPresent(Test::class.java)
