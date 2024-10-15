@@ -1,50 +1,62 @@
 package core
 
-import core.exceptions.InvalidTestSuit
+import core.lifecycle.AfterAll
+import core.lifecycle.AfterEach
 import core.lifecycle.BeforeAll
+import core.lifecycle.BeforeEach
 import java.lang.reflect.Method
 
-/**
- * TestRunner rules:
- * - A Test cannot be at the same time any lifecycle method
- */
-
 object TestRunner {
-    fun preSuitRunner(testClass: Any) =
+    private fun preSuite(testClass: Any) =
         this.also {
-            testClass::class.java
-                .declaredMethods
-                .asList()
-                .filter {
-                    it.isAnnotationPresent(BeforeAll::class.java) and it.isAnnotationPresent(Disabled::class.java).not()
-                }.map {
-                    val isValid =
-                        it.isAnnotationPresent(BeforeAll::class.java) and
-                            it.isAnnotationPresent(Test::class.java).not()
-                    if (isValid) return@map it else throw InvalidTestSuit("BeforeAll cannot be a Test")
-                }.also { if (it.size > 1) InvalidTestSuit("There can only be one BeforeAll per Test Suit") }
-                // TODO:
-                // Probably validations should be in a pre execution stage, I wouldn't want my tests to suddenly fail because I misplaced a decorator or forgot to delete something.
-                // Separate into test runner and test validator!
-                .firstOrNull()
+            findFirstMethodAnnotated<BeforeAll>(testClass)
                 ?.let { executeMethod(it, testClass) }
         }
 
-    fun runTests(testClass: Any): TestSummary =
-        testClass::class.java
-            .declaredMethods
-            .asSequence()
-            .filter { it.isAnnotationPresent(Disabled::class.java).not() and it.isTest() }
-            .map { executeTest(it, testClass) }
-            .toList()
-            .toSummary(testClass::class.simpleName ?: "Unknown")
+    private fun postSuite(testClass: Any) =
+        this.also {
+            findFirstMethodAnnotated<AfterAll>(testClass)
+                ?.let { executeMethod(it, testClass) }
+        }
+
+    private fun preTest(testClass: Any) =
+        this.also {
+            findFirstMethodAnnotated<BeforeEach>(testClass)
+                ?.let { executeMethod(it, testClass) }
+        }
+
+    private fun postTest(testClass: Any) =
+        this.also {
+            findFirstMethodAnnotated<AfterEach>(testClass)
+                ?.let { executeMethod(it, testClass) }
+        }
+
+    fun runTests(testClass: Any): TestSummary {
+        preSuite(testClass)
+        val toReturn =
+            testClass::class.java
+                .declaredMethods
+                .asSequence()
+                .filter { it.isAnnotationPresent(Disabled::class.java).not() and it.isAnnotationPresent(Test::class.java) }
+                .map {
+                    preTest(testClass)
+                    val ret = executeTest(it, testClass)
+                    postTest(testClass)
+                    return@map ret
+                }.filterNotNull()
+                .toList<TestResult>()
+                .toSummary(testClass::class.simpleName ?: "Unknown")
+        postSuite(testClass)
+        return toReturn
+    }
 
     private fun executeMethod(
         method: Method,
         instance: Any,
-    ) {
+    ): TestResult? {
         method.isAccessible = true
         method.invoke(instance)
+        return null
     }
 
     private fun executeTest(
@@ -60,6 +72,13 @@ object TestRunner {
                 error = e.cause?.message ?: e.message ?: "Unknown error",
             )
         }
+
+    private inline fun <
+        reified predicatedAnnotation : Any,
+    > findFirstMethodAnnotated(testClass: Any) =
+        testClass::class.java
+            .declaredMethods
+            .firstOrNull { it.annotations.firstOrNull { annotation -> annotation is predicatedAnnotation } != null }
 }
 
 private fun Method.isTest(): Boolean = this.isAnnotationPresent(Test::class.java)

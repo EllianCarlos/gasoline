@@ -1,5 +1,5 @@
 package core.exceptions
 
-class InvalidTestSuit(
+class InvalidTestSuite(
     message: String,
 ) : Exception(message)
