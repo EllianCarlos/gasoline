@@ -1,5 +1,7 @@
 package core
 
+import core.assertions.Assert
+import core.assertions.assertThat
 import core.lifecycle.AfterAll
 import core.lifecycle.AfterEach
 import core.lifecycle.BeforeAll
@@ -28,9 +30,36 @@ class MyTests {
     }
 
     @Test
+    fun testAssertions() {
+        Assert.assertThat(83).isNotNull()
+        42.assertThat().isEqualTo(42)
+
+        "Hello".assertThat().contains("ell")
+
+        try {
+            42.assertThat().contains("something")
+        } catch (e: AssertionError) {
+            println(e.message)
+        }
+
+        val list = listOf(1, 2, 3)
+        list.assertThat().hasSize<List<Int>, Int>(3)
+
+        42.assertThat().satisfies { it > 40 }
+
+        data class RandomClass(
+            val name: String? = null,
+            val surname: String? = "anySurname",
+        )
+
+        RandomClass().name.assertThat().isNull()
+        RandomClass().surname.assertThat().isNotNull()
+    }
+
+    @Test
     fun testAddition() {
         val result = 2 + 2
-        assert(result == 4) { "Expected 4 but got $result" }
+        result.assertThat().isEqualTo(4)
     }
 
     @Test
