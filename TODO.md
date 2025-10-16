@@ -1,53 +1,27 @@
-Test Annotations (done, document it):
+# TODO
 
-    @Test: Marks a method as a test case.
-    @BeforeEach and @AfterEach: Run before/after each test method for setup and teardown logic.
-    @BeforeAll and @AfterAll: Run once before/after all test methods in a class.
-    @Disabled: Disables a test, so it doesn't run.
+This file tracks the planned features and improvements for the Gasoline test framework.
 
-Assertions:
+## High Priority
+- [ ] **Parameterized Tests:** Introduce the ability to run a single test method with multiple sets of input data.
+- [ ] **Test Suites:** Implement a mechanism to group multiple test classes together and run them as a single unit.
+- [ ] **Asynchronous Code Support:** Add built-in support for testing asynchronous operations, particularly Kotlin Coroutines.
+- [ ] **Expand Assertion Library:** Add more matchers, especially for collections and verifying exceptions (`assertThrows`).
+- [ ] **Advanced Reporting:** Enhance the test reporter to generate more detailed output, including timing information, stack traces, and different formats (e.g., XML, HTML).
 
-    Basic assertions: assertEquals(), assertTrue(), assertFalse(), assertNotNull(), etc.
-    Custom messages: Provide messages for failed assertions.
-    Exception assertions: Check that a method throws an expected exception using something like assertThrows().
+## Medium Priority
+- [ ] **Mocking and Stubbing:** Integrate a simple, lightweight mocking or spying mechanism to help isolate dependencies.
+- [ ] **Gradle Plugin:** Develop a Gradle plugin to simplify test execution and integration into the build process.
+- [ ] **Test Filtering:** Provide a way to run specific tests based on names, tags, or other criteria.
+- [ ] **Conditional Test Execution:** Allow tests to be run based on specific conditions (e.g., platform, configuration).
+- [ ] **Test Execution Control:** Add options for test ordering (e.g., random) and timeouts.
 
-Parameterized Tests:
+## Low Priority
+- [ ] **Command-Line Interface (CLI):** Create a CLI for running tests outside of an IDE or build tool.
+- [ ] **Official Documentation:** Create comprehensive documentation to make the framework easier to adopt and use.
+- [ ] **Assertions on Threads:** Add support for testing multi-threaded code.
 
-    Allow running the same test with different inputs using parameterized tests.
-
-Test Execution Control:
-
-    Test ordering: Run tests in a specific or random order.
-    Timeouts: Limit the time a test can take before failing.
-
-Test Suites:
-
-    Group tests together and run them as a suite.
-
-Mocking and Stubbing:
-
-    Allow the creation of mock objects for isolating test cases.
-
-Assertions on Collections:
-
-    Support for asserting conditions on collections (e.g., checking size, contents, etc.).
-
-Integration with Build Tools:
-
-    Integration with tools like Gradle or Maven for running tests as part of the build process.
-
-Test Result Reporting:
-
-    Detailed reports (e.g., console output, XML, or HTML reports) on test success, failure, and skipped tests.
-
-Conditional Test Execution:
-
-    Run tests based on specific conditions (e.g., platform, configuration).
-
-Test Discovery:
-
-    Automatic discovery of test classes and methods.
-
-Assertions on Threads:
-
-    Support for testing multi-threaded code, with options for ensuring certain conditions are met across threads.
+## Completed
+- [x] **Core Test Annotations:** `@Test`, `@BeforeEach`, `@AfterEach`, `@BeforeAll`, `@AfterAll`, `@Disabled`.
+- [x] **Basic Assertions:** `isEqualTo`, `isNull`, `isNotNull`, `contains`, etc.
+- [x] **Automatic Test Discovery:** The runner automatically finds and executes tests.
