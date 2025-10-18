@@ -129,7 +129,7 @@ class MyTests {
     }
 
     class IntGenerator : ParameterGenerator<Int> {
-        override fun generate(): List<Int> = listOf(0, 2, 4, 222)
+        override fun generate(): Sequence<Int> = listOf(0, 2, 4, 222).asSequence()
     }
 
     @ParametrizedTest(IntGenerator::class)

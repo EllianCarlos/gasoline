@@ -8,18 +8,23 @@ import core.validator.isDisabled
 import core.validator.isParametrized
 import core.validator.isTest
 import kotlin.reflect.KFunction
+import kotlin.reflect.KParameter
 import kotlin.reflect.full.createInstance
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.functions
-import kotlin.reflect.KParameter
+import kotlin.sequences.flatMap
 
 object TestRunner {
-
-    private data class TestExecutable(val method: KFunction<*>, val instance: Any, val args: Array<Any?> = emptyArray()) {
+    private data class TestExecutable(
+        val method: KFunction<*>,
+        val instance: Any,
+        val args: Array<Any?> = emptyArray(),
+    ) {
         fun execute() {
             method.call(instance, *args)
         }
     }
+
     private fun preSuite(testClass: Any) =
         this.also {
             findFirstMethodAnnotatedAndExecute<BeforeAll>(testClass)
@@ -48,29 +53,32 @@ object TestRunner {
                 .asSequence()
                 .filter { it.isDisabled().not() }
                 .filter { it.isTest() }
-                .flatMap { method ->
-                    unfoldParametrizedTests(testClass, method).map { testExecutable ->
-                        preTest(testClass)
-                        val result =
-                            try {
-                                testExecutable.execute()
-                                TestResult.Success(testExecutable.method.name)
-                            } catch (e: Exception) {
-                                TestResult.Failure(
-                                    testName = testExecutable.method.name,
-                                    error =
-                                        (e.cause?.message ?: e.message ?: "Unknown error").plus(" at \n" + e.stackTrace?.joinToString("\n")),
-                                )
-                            }
-                        postTest(testClass)
-                        result
-                    }
-                }
-                .toList()
+                .flatMap { method -> unfoldAndExecute(testClass, method) }
                 .toSummary(testClass::class.simpleName ?: "Unknown")
         postSuite(testClass)
         return testResults
     }
+
+    private fun unfoldAndExecute(
+        testClass: Any,
+        method: KFunction<*>,
+    ) = unfoldParametrizedTests(testClass, method).map { testExecutable ->
+        preTest(testClass)
+        executeTest(testExecutable)
+            .also { postTest(testClass) }
+    }
+
+    private fun executeTest(testExecutable: TestExecutable) =
+        try {
+            testExecutable.execute()
+            TestResult.Success(testExecutable.method.name)
+        } catch (e: Exception) {
+            TestResult.Failure(
+                testName = testExecutable.method.name,
+                error =
+                    (e.cause?.message ?: e.message ?: "Unknown error").plus(" at \n" + e.stackTrace?.joinToString("\n")),
+            )
+        }
 
     private fun extractParameters(method: KFunction<*>) =
         if (method.isParametrized()) {
@@ -86,7 +94,7 @@ object TestRunner {
 
     private fun executeMethod(
         instance: Any,
-        method: KFunction<*>
+        method: KFunction<*>,
     ) {
         if (method.parameters.any { it.kind == KParameter.Kind.INSTANCE }) {
             method.call(instance)
@@ -94,17 +102,18 @@ object TestRunner {
             method.call()
         }
     }
+
     private fun unfoldParametrizedTests(
         instance: Any,
-        method: KFunction<*>
-    ): List<TestExecutable> {
+        method: KFunction<*>,
+    ): Sequence<TestExecutable> {
         if (method.isParametrized().not()) {
-            return listOf(TestExecutable(method, instance))
+            return sequence { yield(TestExecutable(method, instance)) }
         }
 
         return extractParameters(method)
             ?.map { parameter -> TestExecutable(method, instance, arrayOf(parameter)) }
-            ?: emptyList()
+            ?: sequence {}
     }
 
     private inline fun <
