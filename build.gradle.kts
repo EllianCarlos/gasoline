@@ -23,7 +23,9 @@ group = "org.example"
 
 version = "1.0-SNAPSHOT"
 
-dependencies { }
+dependencies {
+    implementation(kotlin("reflect"))
+}
 
 tasks.test { useJUnitPlatform() }
 

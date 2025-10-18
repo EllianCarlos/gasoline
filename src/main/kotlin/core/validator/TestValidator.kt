@@ -1,5 +1,7 @@
 package core.validator
 
+import core.Disabled
+import core.ParametrizedTest
 import core.Test
 import core.exceptions.InvalidTestSuite
 import core.lifecycle.AfterAll
@@ -7,7 +9,9 @@ import core.lifecycle.AfterEach
 import core.lifecycle.BeforeAll
 import core.lifecycle.BeforeEach
 import core.lifecycle.methods.isLifecycleMethod
-import java.lang.reflect.Method
+import kotlin.reflect.KFunction
+import kotlin.reflect.full.findAnnotation
+import kotlin.reflect.full.functions
 
 object TestValidator {
     /**
@@ -20,15 +24,15 @@ object TestValidator {
         // map of Annotation simpleClassName to count of Presence in the same suite
         val lifecycleMethodsPresent = mutableMapOf<String, Int>()
 
-        testClass::class.java
-            .declaredMethods
+        testClass::class
+            .functions
             .map { validateMethod(it, lifecycleMethodsPresent) }
 
         return lifecycleMethodsPresent.toMap()
     }
 
     private fun validateMethod(
-        method: Method,
+        method: KFunction<*>,
         lifecycleMethodsPresent: MutableMap<String, Int>,
     ): Boolean {
         if (method.isTest() and method.isLifecycleMethod()) {
@@ -41,7 +45,7 @@ object TestValidator {
     }
 
     private fun validateLifecycleAnnotations(
-        method: Method,
+        method: KFunction<*>,
         lifecycleMethodsPresent: MutableMap<String, Int>,
     ) {
         method.annotations
@@ -64,7 +68,8 @@ object TestValidator {
     }
 }
 
-private fun Annotation.isLifecycleAnnotation(): Boolean =
-    setOf(BeforeAll::class, BeforeEach::class, AfterAll::class, AfterEach::class).contains(this::class)
+fun KFunction<*>.isTest(): Boolean = this.findAnnotation<Test>() != null || this.findAnnotation<ParametrizedTest>() != null
 
-private fun Method.isTest(): Boolean = this.isAnnotationPresent(Test::class.java)
+fun KFunction<*>.isDisabled(): Boolean = this.findAnnotation<Disabled>() != null
+
+fun KFunction<*>.isParametrized(): Boolean = this.findAnnotation<ParametrizedTest>() != null

@@ -118,13 +118,22 @@ class MyTests {
     @Test
     fun testSubtraction() {
         val result = 5 - 3
-        assert(result == 2) { "Expected 2 but got $result" }
+        result.assertThat().isEqualTo(2)
     }
 
     @Disabled
     @Test
     fun testFailingTest() {
         val result = 2 * 2
-        assert(result == 5) { "Expected 5 but got $result" }
+        result.assertThat().isEqualTo(5)
+    }
+
+    class IntGenerator : ParameterGenerator<Int> {
+        override fun generate(): List<Int> = listOf(0, 2, 4, 222)
+    }
+
+    @ParametrizedTest(IntGenerator::class)
+    fun testParametrizedTest(number: Int) {
+        number.assertThat().satisfies { it % 2 == 0 }
     }
 }
