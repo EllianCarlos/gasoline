@@ -21,7 +21,6 @@ import core.lifecycle.AfterEach
 import core.lifecycle.BeforeAll
 import core.lifecycle.BeforeEach
 
-// Example test class
 class MyTests {
     @BeforeAll
     fun beforeAll() {

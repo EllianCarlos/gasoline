@@ -3,7 +3,7 @@
 This file tracks the planned features and improvements for the Gasoline test framework.
 
 ## High Priority
-- [x] **Parameterized Tests:** Introduce the ability to run a single test method with multiple sets of input data.
+- [ ] **Automatic Test Discovery:** The runner automatically finds and executes tests.
 - [ ] **Test Suites:** Implement a mechanism to group multiple test classes together and run them as a single unit.
 - [ ] **Asynchronous Code Support:** Add built-in support for testing asynchronous operations, particularly Kotlin Coroutines.
 - [ ] **Expand Assertion Library:** Add more matchers, especially for collections and verifying exceptions (`assertThrows`).
@@ -24,4 +24,4 @@ This file tracks the planned features and improvements for the Gasoline test fra
 ## Completed
 - [x] **Core Test Annotations:** `@Test`, `@BeforeEach`, `@AfterEach`, `@BeforeAll`, `@AfterAll`, `@Disabled`.
 - [x] **Basic Assertions:** `isEqualTo`, `isNull`, `isNotNull`, `contains`, etc.
-- [x] **Automatic Test Discovery:** The runner automatically finds and executes tests.
+- [x] **Parameterized Tests:** Introduce the ability to run a single test method with multiple sets of input data.
