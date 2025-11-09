@@ -1,19 +1,14 @@
-rootProject.name = "gasoline"
-
 pluginManagement {
     repositories {
-        System.getenv()["NIX_MAVEN_REPO"]?.let {
-            mavenLocal {
-                url = uri(it)
-                metadataSources {
-                    mavenPom()
-                    gradleMetadata()
-                }
-            }
-        }
-            ?: run {
-                mavenCentral()
-                gradlePluginPortal()
-            }
+        gradlePluginPortal()
+        mavenCentral()
     }
+    plugins {
+        kotlin("jvm") version "1.9.23"
+    }
+    includeBuild("plugin")
 }
+
+rootProject.name = "gasoline-root"
+
+include("tester")
